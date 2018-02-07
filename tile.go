@@ -26,23 +26,7 @@ func (t *Tile) Num2deg() (lat float64, long float64) {
 }
 
 func (t *Tile) NextTile() *Tile {
-	lat, lng := t.Num2deg()
-	return &Tile{
-		X: t.X + 1,
-		Y: t.Y + 1,
-		Z: t.Z,
-		Lat: lat,
-		Long: lng,
-	}
-}
-
-func NewTileWithLatLong(lat float64, long float64, z int) (t *Tile) {
-	t = new(Tile)
-	t.Lat = lat
-	t.Long = long
-	t.Z = z
-	t.X, t.Y = t.Deg2num()
-	return
+	return NewTileWithXY(t.X + 1, t.Y + 1, t.Z)
 }
 
 func NewTileWithXY(x int, y int, z int) (t *Tile) {
@@ -52,4 +36,11 @@ func NewTileWithXY(x int, y int, z int) (t *Tile) {
 	t.Y = y
 	t.Lat, t.Long = t.Num2deg()
 	return
+}
+
+func Deg2mtrs(lat float64, lon float64) (float64, float64) {
+	x := lon * 20037508.34 / 180.0
+	y := math.Log(math.Tan((90.0 + lat) * math.Pi / 360.0)) / (math.Pi / 180.0)
+	y = y * 20037508.34 / 180.0
+	return x, y
 }

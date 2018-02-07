@@ -2,22 +2,32 @@ package main
 
 import (
 	"log"
-	"time"
-	"image"
+	"os"
+	"io/ioutil"
 )
 
 func main() {
 	log.Println("Starting the dispatcher")
 	StartDispatcher(3)
 
-	time.Sleep(time.Second * 2)
-
-	out := make(chan image.Image)
-	request := RenderRequest{2011, 1362, 12, out}
+	out := make(chan []byte)
+	tile := NewTileWithXY(8047, 5449, 14)
+	request := RenderRequest{tile, out}
 
 	RenderQueue <- request
 
 	log.Println("Waiting for image back")
 	img := <- out
-	log.Println(img)
+	log.Println("Got image saving")
+
+	f, err := os.Create("image.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+
+	err = ioutil.WriteFile("image.png", img, 0644)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

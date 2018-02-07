@@ -1,12 +1,17 @@
 package main
 
-import "log"
+import (
+	"log"
+	"github.com/fawick/go-mapnik/mapnik"
+)
 
 var RenderQueue = make(chan RenderRequest, 100)
 
 var WorkerQueue chan chan RenderRequest
 
 func StartDispatcher(nworkers int) {
+	mapnik.RegisterFonts("/usr/share/fonts/truetype/ttf-dejavu")
+
 	WorkerQueue = make(chan chan RenderRequest, nworkers)
 
 	for i := 0; i<nworkers; i++ {
@@ -21,7 +26,7 @@ func StartDispatcher(nworkers int) {
 			case work := <-RenderQueue:
 				log.Println("Received render requeust")
 				go func() {
-					worker := <-WorkerQueue
+					worker := <- WorkerQueue
 
 					log.Println("Dispatching render request")
 					worker <- work
