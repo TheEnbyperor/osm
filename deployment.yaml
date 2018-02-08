@@ -1,0 +1,108 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: osm-cymru
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: tile-cache-pv-claim
+  namespace: osm-cmyru
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: postgres-pv-claim
+  namespace: osm-cmyru
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: osm-cymru
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-pv-claim
+      containers:
+      - name: postgres
+        image: postgres
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 5432
+            protocol: TCP
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "Rwbwreia123&"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: osm-cymru
+  name: postgres
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+  - port: 5432
+    protocol: TCP
+    targetPort: 5432
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: server
+  namespace: osm-cymru
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+      - name: server
+        image: evilben/osm
+        imagePullPolicy: Always
+        ports:
+          - containerPort: 8001
+            protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: osm-cymru
+  name: server
+  labels:
+    app: server
+spec:
+  selector:
+    app: server
+  ports:
+  - port: 8080
+    protocol: TCP
+    targetPort: 8080

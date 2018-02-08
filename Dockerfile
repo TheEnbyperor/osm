@@ -10,3 +10,4 @@ COPY osm-bright-master osm-bright-master
 RUN cd osm-bright-master && ./make.py && cd ../OSMBright/ && carto project.mml > OSMBright.xml
 
 COPY osm ./
+CMD /src/osm
