@@ -2,6 +2,7 @@ package main
 
 import (
 	"math"
+	"fmt"
 )
 
 type Tile struct {
@@ -10,6 +11,14 @@ type Tile struct {
 	Y    int
 	Lat  float64
 	Long float64
+}
+
+func (t *Tile) URL() string {
+	return fmt.Sprintf("%d/%d/%d.png", t.Z, t.X, t.Y)
+}
+
+func (t *Tile) URLBase() string {
+	return fmt.Sprintf("%d/%d", t.Z, t.X)
 }
 
 func (t *Tile) Deg2num() (x int, y int) {
