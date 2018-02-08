@@ -11,6 +11,7 @@ var WorkerQueue chan chan RenderRequest
 
 func StartDispatcher(nworkers int) {
 	mapnik.RegisterFonts("/usr/share/fonts/truetype/ttf-dejavu")
+	mapnik.RegisterFonts("/usr/share/fonts/truetype/dejavu")
 
 	WorkerQueue = make(chan chan RenderRequest, nworkers)
 
