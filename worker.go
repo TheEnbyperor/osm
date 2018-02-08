@@ -73,12 +73,15 @@ func (w *Worker) Stop() {
 }
 
 func (w *Worker) renderTile(t *Tile) ([]byte, error) {
+
 	next := t.NextTile()
 	p := w.m.Projection()
 	ll := p.Forward(mapnik.Coord{t.Long, t.Lat})
 	ur := p.Forward(mapnik.Coord{next.Long, next.Lat})
-	log.Println(t, next)
+
+	w.m.Resize(256, 256)
 	w.m.ZoomToMinMax(ll.X, ll.Y, ur.X, ur.Y)
+	w.m.SetBufferSize(128)
 
 	img, err := w.m.RenderToMemoryPng()
 	if err != nil {
