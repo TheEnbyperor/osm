@@ -7,7 +7,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: tile-cache-pv-claim
-  namespace: osm-cmyru
+  namespace: osm-cymru
 spec:
   accessModes:
   - ReadWriteOnce
@@ -19,7 +19,7 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: postgres-pv-claim
-  namespace: osm-cmyru
+  namespace: osm-cymru
 spec:
   accessModes:
   - ReadWriteOnce
@@ -45,7 +45,7 @@ spec:
           claimName: postgres-pv-claim
       containers:
       - name: postgres
-        image: postgres
+        image: skywidesoft/postgis-hstore
         imagePullPolicy: Always
         ports:
           - containerPort: 5432
@@ -75,6 +75,30 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
+  name: updater
+  namespace: osm-cymru
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: updater
+    spec:
+      containers:
+      - name: updater
+        image: evilben/osm-updater@sha256:bace230b6c7b1886802673163fb859dc3bbe869c49b07a43ea7050de8f023267
+        imagePullPolicy: Always
+        env:
+        - name: DB_HOST
+          value: "postgres"
+        - name: DB_NAME
+          value: "postgres"
+        - name: DB_PASS
+          value: "Rwbwreia123&"
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
   name: server
   namespace: osm-cymru
 spec:
@@ -84,6 +108,10 @@ spec:
       labels:
         app: server
     spec:
+      volumes:
+      - name: tile-cache
+        persistentVolumeClaim:
+          claimName: tile-cache-pv-claim
       containers:
       - name: server
         image: evilben/osm
@@ -91,6 +119,9 @@ spec:
         ports:
           - containerPort: 8001
             protocol: TCP
+        volumeMounts:
+        - name: tile-cache
+          mountPath: /src/cache
 ---
 apiVersion: v1
 kind: Service
